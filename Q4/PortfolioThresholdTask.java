@@ -22,7 +22,28 @@ public class PortfolioThresholdTask extends RecursiveAction {
         this.riskCap = riskCap;
     }
 
-    @Override
+       @Override
     protected void compute() {
+        if (end - start <= THRESHOLD) {
+            for (int i = start; i < end; i++) {
+                if (values[i] > riskCap) {
+                    values[i] *= 0.95;
+                }
+            }
+
+            return;
+        }
+
+        int mid = start + (end - start) / 2;
+
+        invokeAll(
+            new PortfolioThresholdTask(
+                values, start, mid, riskCap
+            ),
+
+            new PortfolioThresholdTask(
+                values, mid, end, riskCap
+            )
+        );
     }
 }
