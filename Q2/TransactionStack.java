@@ -1,5 +1,4 @@
 package Q2;
-
 public class TransactionStack {
     private final char[] data;
     private int top;
