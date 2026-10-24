@@ -14,4 +14,11 @@ public class TransactionStack {
         data = new char[capacity];
         top = -1;
     }
+        public void push(char c) {
+        if (top == data.length - 1) {
+            throw new IllegalStateException("Stack overflow");
+        }
+
+        data[++top] = c;
+    }
 }
