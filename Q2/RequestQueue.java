@@ -27,4 +27,20 @@ public class RequestQueue {
         rear = (rear + 1) % data.length;
         size++;
     }
+        public char dequeue() {
+        if (isEmpty()) {
+            throw new IllegalStateException("Queue underflow");
+        }
+
+        char value = data[front];
+
+        front = (front + 1) % data.length;
+        size--;
+
+        return value;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
 }
