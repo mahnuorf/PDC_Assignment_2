@@ -18,4 +18,13 @@ public class RequestQueue {
         rear = 0;
         size = 0;
     }
+        public void enqueue(char c) {
+        if (size == data.length) {
+            throw new IllegalStateException("Queue overflow");
+        }
+
+        data[rear] = c;
+        rear = (rear + 1) % data.length;
+        size++;
+    }
 }
