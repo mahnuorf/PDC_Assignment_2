@@ -29,5 +29,17 @@ public class AsyncWebEngineApp {
             telemetry.getState(),
             logs.getState()
         );
+                telemetry.join();
+        logs.join();
+
+        System.out.printf(
+            "After join: telemetry=%s, logs=%s%n",
+            telemetry.getState(),
+            logs.getState()
+        );
+
+        System.out.println(
+            "Both workers completed five iterations."
+        );
     }
 }
