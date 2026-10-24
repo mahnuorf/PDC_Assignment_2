@@ -21,4 +21,23 @@ public class TransactionStack {
 
         data[++top] = c;
     }
+        public char pop() {
+        if (isEmpty()) {
+            throw new IllegalStateException("Stack underflow");
+        }
+
+        return data[top--];
+    }
+
+    public char peek() {
+        if (isEmpty()) {
+            throw new IllegalStateException("Stack underflow");
+        }
+
+        return data[top];
+    }
+
+    public boolean isEmpty() {
+        return top == -1;
+    }
 }
