@@ -57,6 +57,10 @@ public class ForkJoinPortfolioApp {
         ForkJoinPool pool = new ForkJoinPool();
 
         try {
+                        for (int i = 0; i < 3; i++) {
+                serial(original.clone(), cap);
+                parallel(pool, original.clone(), cap);
+            }
             double[] sequentialValues = original.clone();
             double[] parallelValues = original.clone();
 
@@ -119,6 +123,26 @@ public class ForkJoinPortfolioApp {
             );
 
             System.out.println("Results match: " + match);
+                        System.out.printf(
+                "Serial time: %.6f ms%n"
+                + "Parallel time: %.6f ms%n",
+                serialNs / 1_000_000.0,
+                parallelNs / 1_000_000.0
+            );
+
+            System.out.printf(
+                "Measured speedup: %.4f x%n",
+                (double) serialNs / parallelNs
+            );
+
+            System.out.println(
+                "Timing covers penalty plus sum; "
+                + "setup, cloning and printing are excluded."
+            );
+
+            System.out.println(
+                "Speedup below 1 means parallel was slower."
+            );
         } finally {
             pool.shutdown();
         }
