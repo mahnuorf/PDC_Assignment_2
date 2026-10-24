@@ -21,5 +21,13 @@ public class AsyncWebEngineApp {
             telemetry.getState(),
             logs.getState()
         );
+                telemetry.start();
+        logs.start();
+
+        System.out.printf(
+            "After start: telemetry=%s, logs=%s%n",
+            telemetry.getState(),
+            logs.getState()
+        );
     }
 }
