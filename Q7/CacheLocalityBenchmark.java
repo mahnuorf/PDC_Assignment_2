@@ -94,8 +94,16 @@ public class CacheLocalityBenchmark {
                 iteration <= REPETITIONS;
                 iteration++) {
 
-            long rowNs = benchmark.measure(true);
-            long columnNs = benchmark.measure(false);
+                        long rowNs;
+            long columnNs;
+
+            if (iteration % 2 == 1) {
+                rowNs = benchmark.measure(true);
+                columnNs = benchmark.measure(false);
+            } else {
+                columnNs = benchmark.measure(false);
+                rowNs = benchmark.measure(true);
+            }
 
             rowTotal += rowNs;
             columnTotal += columnNs;
