@@ -51,9 +51,36 @@ public class SensorGridMonitorApp {
                 );
             }
 
+                        double globalMin = Double.POSITIVE_INFINITY;
+            double globalMax = Double.NEGATIVE_INFINITY;
+
+            for (int part = 0; part < workers; part++) {
+                globalMin = Math.min(
+                    globalMin,
+                    mins.get(part).get()
+                );
+
+                globalMax = Math.max(
+                    globalMax,
+                    maxes.get(part).get()
+                );
+            }
+
+            double elapsedMs =
+                (System.nanoTime() - startTime)
+                / 1_000_000.0;
+
             System.out.println(
-                "Submitted min tasks: " + mins.size()
-                + ", max tasks: " + maxes.size()
+                "Sensor count: " + count
+                + " | worker threads: " + workers
+            );
+
+            System.out.println(
+                "Global minimum: " + globalMin
+            );
+
+            System.out.println(
+                "Global maximum: " + globalMax
             );
         } finally {
             pool.shutdown();
