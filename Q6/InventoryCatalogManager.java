@@ -182,22 +182,67 @@ public class InventoryCatalogManager {
             }
         }
     }
-        public static void main(String[] args) throws Exception {
-            System.out.println("Concurrent products="
-            + createCatalog(true).size()
+        private static void printResult(
+            String label,
+            Result result) {
+
+        double seconds =
+            result.elapsedNs / 1_000_000_000.0;
+
+        System.out.printf(
+            "%s | threads=%d | transactions=%d"
+            + " | time=%.3f ms"
+            + " | throughput=%.2f transactions/s%n",
+            label,
+            WORKERS,
+            result.transactions,
+            result.elapsedNs / 1_000_000.0,
+            result.transactions / seconds
         );
+
+        System.out.printf(
+            "Final stock total=%d | lookup checksum=%d"
+            + " | stock verification=true%n",
+            result.finalStock,
+            result.lookupChecksum
+        );
+    }
+
+    public static Result benchmarkSynchronizedMap()
+            throws Exception {
+
+        Result result = runBenchmark(
+            false,
+            OPERATIONS_PER_WORKER
+        );
+
+        printResult("SynchronizedMap", result);
+        return result;
+    }
+
+    public static Result benchmarkConcurrentMap()
+            throws Exception {
+
         Result result = runBenchmark(
             true,
             OPERATIONS_PER_WORKER
         );
 
+        printResult("ConcurrentHashMap", result);
+        return result;
+    }
+           public static void main(String[] args) throws Exception {
         System.out.println(
-            "Completed transactions="
-            + result.transactions
+            "One transaction = one stock lookup "
+            + "and one atomic increment."
         );
 
         System.out.println(
-            "Final stock=" + result.finalStock
+            "50,000 transactions per worker; "
+            + "500,000 transactions per measured benchmark."
         );
+
+        benchmarkSynchronizedMap();
+        benchmarkConcurrentMap();
     }
 }
