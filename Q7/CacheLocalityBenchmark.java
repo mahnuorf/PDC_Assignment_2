@@ -85,6 +85,7 @@ public class CacheLocalityBenchmark {
             sink = benchmark.traverseRowMajor();
             sink = benchmark.traverseColumnMajor();
         }
+        
 
         long rowTotal = 0;
         long columnTotal = 0;
@@ -107,5 +108,30 @@ public class CacheLocalityBenchmark {
                 columnNs / 1_000_000.0
             );
         }
+                System.out.printf(
+            "Measured repetitions per traversal: %d%n",
+            REPETITIONS
+        );
+
+        System.out.printf(
+            "Average row-major time: %.3f ms%n",
+            rowTotal / (REPETITIONS * 1_000_000.0)
+        );
+
+        System.out.printf(
+            "Average column-major time: %.3f ms%n",
+            columnTotal / (REPETITIONS * 1_000_000.0)
+        );
+
+        System.out.printf(
+            "Row-major speedup (column / row): %.3f x%n",
+            (double) columnTotal / rowTotal
+        );
+
+        System.out.printf(
+            "Consumed checksum: %.0f%n",
+            sink
+        );
+
     }
 }
