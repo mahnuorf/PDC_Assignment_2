@@ -19,11 +19,21 @@ public class InventoryCatalogManager {
     private static final int INITIAL_STOCK = 100;
     private static final int ROUNDS = 3;
 
-    public static void main(String[] args) {
+        private static Map<String, Integer> createCatalog(boolean concurrent) {
+
+        Map<String, Integer> catalog =
+            Collections.synchronizedMap(new HashMap<>());
+
+        for (int i = 0; i < PRODUCTS; i++) {
+            catalog.put("P" + i, INITIAL_STOCK);
+        }
+
+        return catalog;
+    }
+       public static void main(String[] args) {
         System.out.println(
-            "Workers=" + WORKERS
-            + ", transactions per worker="
-            + OPERATIONS_PER_WORKER
+            "Initial product count="
+            + createCatalog(false).size()
         );
     }
 }
