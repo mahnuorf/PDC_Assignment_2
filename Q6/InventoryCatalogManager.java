@@ -19,10 +19,12 @@ public class InventoryCatalogManager {
     private static final int INITIAL_STOCK = 100;
     private static final int ROUNDS = 3;
 
-        private static Map<String, Integer> createCatalog(boolean concurrent) {
+           private static Map<String, Integer> createCatalog(
+            boolean concurrent) {
 
-        Map<String, Integer> catalog =
-            Collections.synchronizedMap(new HashMap<>());
+        Map<String, Integer> catalog = concurrent
+            ? new ConcurrentHashMap<>()
+            : Collections.synchronizedMap(new HashMap<>());
 
         for (int i = 0; i < PRODUCTS; i++) {
             catalog.put("P" + i, INITIAL_STOCK);
@@ -168,7 +170,10 @@ public class InventoryCatalogManager {
             }
         }
     }
-             public static void main(String[] args) throws Exception {
+        public static void main(String[] args) throws Exception {
+            System.out.println("Concurrent products="
+            + createCatalog(true).size()
+        );
         Result result = runBenchmark(
             false,
             OPERATIONS_PER_WORKER
