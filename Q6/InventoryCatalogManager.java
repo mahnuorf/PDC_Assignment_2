@@ -231,7 +231,7 @@ public class InventoryCatalogManager {
         printResult("ConcurrentHashMap", result);
         return result;
     }
-           public static void main(String[] args) throws Exception {
+             public static void main(String[] args) throws Exception {
         System.out.println(
             "One transaction = one stock lookup "
             + "and one atomic increment."
@@ -242,7 +242,64 @@ public class InventoryCatalogManager {
             + "500,000 transactions per measured benchmark."
         );
 
-        benchmarkSynchronizedMap();
-        benchmarkConcurrentMap();
+        System.out.println(
+            "The lookup is observational; "
+            + "only the increment must be atomic."
+        );
+
+        runBenchmark(false, 1000);
+        runBenchmark(true, 1000);
+
+        long syncNs = 0;
+        long concurrentNs = 0;
+
+        for (int round = 1; round <= ROUNDS; round++) {
+            System.out.println(
+                "Measured round " + round
+            );
+
+            Result sync;
+            Result concurrent;
+
+            if (round % 2 == 1) {
+                sync = benchmarkSynchronizedMap();
+                concurrent = benchmarkConcurrentMap();
+            } else {
+                concurrent = benchmarkConcurrentMap();
+                sync = benchmarkSynchronizedMap();
+            }
+
+            syncNs += sync.elapsedNs;
+            concurrentNs += concurrent.elapsedNs;
+        }
+
+        long transactions =
+            (long) WORKERS
+            * OPERATIONS_PER_WORKER
+            * ROUNDS;
+
+        System.out.printf(
+            "Average synchronized time: %.3f ms"
+            + " | aggregate throughput: %.2f transactions/s%n",
+            syncNs / (ROUNDS * 1_000_000.0),
+            transactions / (syncNs / 1_000_000_000.0)
+        );
+
+        System.out.printf(
+            "Average concurrent time: %.3f ms"
+            + " | aggregate throughput: %.2f transactions/s%n",
+            concurrentNs / (ROUNDS * 1_000_000.0),
+            transactions / (concurrentNs / 1_000_000_000.0)
+        );
+
+        System.out.printf(
+            "Measured concurrent speedup: %.3f x%n",
+            (double) syncNs / concurrentNs
+        );
+
+        System.out.println(
+            "Setup, worker creation, validation and printing "
+            + "are outside the timed region."
+        );
     }
 }
