@@ -15,14 +15,24 @@ public class CacheLocalityBenchmark {
             }
         }
     }
-        public static void main(String[] args) {
+        public double traverseRowMajor() {
+        double sum = 0;
+
+        for (int i = 0; i < N; i++) {
+            for (int j = 0; j < N; j++) {
+                sum += matrix[i][j];
+            }
+        }
+
+        return sum;
+    }
+     public static void main(String[] args) {
         CacheLocalityBenchmark benchmark =
             new CacheLocalityBenchmark();
 
         System.out.println(
-            "First=" + benchmark.matrix[0][0]
-            + ", last="
-            + benchmark.matrix[N - 1][N - 1]
+            "Row-major sum="
+            + benchmark.traverseRowMajor()
         );
     }
 }
