@@ -82,6 +82,37 @@ public class SensorGridMonitorApp {
             System.out.println(
                 "Global maximum: " + globalMax
             );
+                        double serialMin = Double.POSITIVE_INFINITY;
+            double serialMax = Double.NEGATIVE_INFINITY;
+
+            for (double value : data) {
+                serialMin = Math.min(serialMin, value);
+                serialMax = Math.max(serialMax, value);
+            }
+
+            boolean correct =
+                globalMin == serialMin
+                && globalMax == serialMax;
+
+            if (!correct) {
+                throw new IllegalStateException(
+                    "Sensor extrema mismatch"
+                );
+            }
+
+            System.out.println(
+                "Sequential verification: " + correct
+            );
+
+            System.out.printf(
+                "Parallel search time: %.3f ms%n",
+                elapsedMs
+            );
+
+            System.out.println(
+                "Eight min/max tasks share four workers; "
+                + "all are submitted before waiting."
+            );
         } finally {
             pool.shutdown();
 
