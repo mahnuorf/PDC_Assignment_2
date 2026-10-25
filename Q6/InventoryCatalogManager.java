@@ -30,10 +30,27 @@ public class InventoryCatalogManager {
 
         return catalog;
     }
-       public static void main(String[] args) {
+        private static long transaction(
+            Map<String, Integer> catalog,
+            String key,
+            boolean concurrent) {
+
+        synchronized (catalog) {
+            int observed = catalog.get(key);
+            catalog.put(key, observed + 1);
+
+            return observed;
+        }
+    }
+          public static void main(String[] args) {
+        Map<String, Integer> catalog =
+            createCatalog(false);
+
+        transaction(catalog, "P0", false);
+
         System.out.println(
-            "Initial product count="
-            + createCatalog(false).size()
+            "Stock after one increment="
+            + catalog.get("P0")
         );
     }
 }
