@@ -26,6 +26,17 @@ public class CacheLocalityBenchmark {
 
         return sum;
     }
+        public double traverseColumnMajor() {
+        double sum = 0;
+
+        for (int j = 0; j < N; j++) {
+            for (int i = 0; i < N; i++) {
+                sum += matrix[i][j];
+            }
+        }
+
+        return sum;
+    }
      public static void main(String[] args) {
         CacheLocalityBenchmark benchmark =
             new CacheLocalityBenchmark();
@@ -33,6 +44,10 @@ public class CacheLocalityBenchmark {
         System.out.println(
             "Row-major sum="
             + benchmark.traverseRowMajor()
+        );
+                System.out.println(
+            "Column-major sum="
+            + benchmark.traverseColumnMajor()
         );
     }
 }
