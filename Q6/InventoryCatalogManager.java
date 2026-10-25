@@ -32,13 +32,25 @@ public class InventoryCatalogManager {
 
         return catalog;
     }
-        private static long transaction(
+    private static long transaction(
             Map<String, Integer> catalog,
             String key,
             boolean concurrent) {
 
+        if (concurrent) {
+            int observed = catalog.get(key);
+
+            catalog.compute(
+                key,
+                (product, stock) -> stock + 1
+            );
+
+            return observed;
+        }
+
         synchronized (catalog) {
             int observed = catalog.get(key);
+
             catalog.put(key, observed + 1);
 
             return observed;
@@ -175,7 +187,7 @@ public class InventoryCatalogManager {
             + createCatalog(true).size()
         );
         Result result = runBenchmark(
-            false,
+            true,
             OPERATIONS_PER_WORKER
         );
 
