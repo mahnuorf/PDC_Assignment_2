@@ -42,15 +42,145 @@ public class InventoryCatalogManager {
             return observed;
         }
     }
-          public static void main(String[] args) {
-        Map<String, Integer> catalog =
-            createCatalog(false);
+        private static class Result {
+        final long transactions;
+        final long elapsedNs;
+        final long finalStock;
+        final long lookupChecksum;
 
-        transaction(catalog, "P0", false);
+        Result(
+                long transactions,
+                long elapsedNs,
+                long finalStock,
+                long lookupChecksum) {
+
+            this.transactions = transactions;
+            this.elapsedNs = elapsedNs;
+            this.finalStock = finalStock;
+            this.lookupChecksum = lookupChecksum;
+        }
+    }
+
+    private static Result runBenchmark(
+            boolean concurrent,
+            int perWorker) throws Exception {
+
+        Map<String, Integer> catalog =
+            createCatalog(concurrent);
+
+        String[] keys = new String[PRODUCTS];
+
+        for (int i = 0; i < PRODUCTS; i++) {
+            keys[i] = "P" + i;
+        }
+
+        ExecutorService pool =
+            Executors.newFixedThreadPool(WORKERS);
+
+        CountDownLatch ready =
+            new CountDownLatch(WORKERS);
+
+        CountDownLatch startGate =
+            new CountDownLatch(1);
+
+        List<Future<Long>> tasks = new ArrayList<>();
+
+        try {
+            for (int worker = 0;
+                    worker < WORKERS;
+                    worker++) {
+
+                final int workerId = worker;
+
+                tasks.add(pool.submit(() -> {
+                    ready.countDown();
+                    startGate.await();
+
+                    long checksum = 0;
+
+                    for (int op = 0; op < perWorker; op++) {
+                        String key = keys[
+                            (op + workerId * 31) % PRODUCTS
+                        ];
+
+                        checksum += transaction(
+                            catalog,
+                            key,
+                            concurrent
+                        );
+                    }
+
+                    return checksum;
+                }));
+            }
+
+            if (!ready.await(1, TimeUnit.MINUTES)) {
+                throw new IllegalStateException(
+                    "Workers not ready"
+                );
+            }
+
+            long start = System.nanoTime();
+            startGate.countDown();
+
+            long checksum = 0;
+
+            for (Future<Long> task : tasks) {
+                checksum += task.get();
+            }
+
+            long elapsedNs =
+                System.nanoTime() - start;
+
+            long totalStock = 0;
+
+            for (int i = 0; i < PRODUCTS; i++) {
+                totalStock += catalog.get(keys[i]);
+            }
+
+            long totalTransactions =
+                (long) WORKERS * perWorker;
+
+            long expectedStock =
+                (long) PRODUCTS * INITIAL_STOCK
+                + totalTransactions;
+
+            if (totalStock != expectedStock) {
+                throw new IllegalStateException(
+                    "Lost stock updates"
+                );
+            }
+
+            return new Result(
+                totalTransactions,
+                elapsedNs,
+                totalStock,
+                checksum
+            );
+        } finally {
+            startGate.countDown();
+            pool.shutdownNow();
+
+            if (!pool.awaitTermination(1, TimeUnit.MINUTES)) {
+                throw new IllegalStateException(
+                    "Inventory workers timed out"
+                );
+            }
+        }
+    }
+             public static void main(String[] args) throws Exception {
+        Result result = runBenchmark(
+            false,
+            OPERATIONS_PER_WORKER
+        );
 
         System.out.println(
-            "Stock after one increment="
-            + catalog.get("P0")
+            "Completed transactions="
+            + result.transactions
+        );
+
+        System.out.println(
+            "Final stock=" + result.finalStock
         );
     }
 }
