@@ -37,6 +37,19 @@ public class CacheLocalityBenchmark {
 
         return sum;
     }
+        private long measure(boolean rowMajor) {
+        long start = System.nanoTime();
+
+        double sum = rowMajor
+            ? traverseRowMajor()
+            : traverseColumnMajor();
+
+        long elapsed = System.nanoTime() - start;
+
+        sink = sum;
+
+        return elapsed;
+    }
         public static void main(String[] args) {
         CacheLocalityBenchmark benchmark =
             new CacheLocalityBenchmark();
@@ -68,5 +81,31 @@ public class CacheLocalityBenchmark {
             columnSum,
             match
         );
+            for (int warmup = 0; warmup < 3; warmup++) {
+            sink = benchmark.traverseRowMajor();
+            sink = benchmark.traverseColumnMajor();
+        }
+
+        long rowTotal = 0;
+        long columnTotal = 0;
+
+        for (int iteration = 1;
+                iteration <= REPETITIONS;
+                iteration++) {
+
+            long rowNs = benchmark.measure(true);
+            long columnNs = benchmark.measure(false);
+
+            rowTotal += rowNs;
+            columnTotal += columnNs;
+
+            System.out.printf(
+                "Iteration %2d | row=%.3f ms"
+                + " | column=%.3f ms%n",
+                iteration,
+                rowNs / 1_000_000.0,
+                columnNs / 1_000_000.0
+            );
+        }
     }
 }
