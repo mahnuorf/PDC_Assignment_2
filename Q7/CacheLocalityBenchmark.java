@@ -37,17 +37,36 @@ public class CacheLocalityBenchmark {
 
         return sum;
     }
-     public static void main(String[] args) {
+        public static void main(String[] args) {
         CacheLocalityBenchmark benchmark =
             new CacheLocalityBenchmark();
 
-        System.out.println(
-            "Row-major sum="
-            + benchmark.traverseRowMajor()
-        );
-                System.out.println(
-            "Column-major sum="
-            + benchmark.traverseColumnMajor()
+        double expected = 198000000.0;
+
+        double rowSum =
+            benchmark.traverseRowMajor();
+
+        double columnSum =
+            benchmark.traverseColumnMajor();
+
+        boolean match =
+            rowSum == expected
+            && columnSum == expected;
+
+        if (!match) {
+            throw new IllegalStateException(
+                "Matrix sums differ"
+            );
+        }
+
+        System.out.printf(
+            "Matrix: %d x %d | row sum=%.0f"
+            + " | column sum=%.0f | sums match=%s%n",
+            N,
+            N,
+            rowSum,
+            columnSum,
+            match
         );
     }
 }
